@@ -16,7 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Plus, ArrowLeft, TrendingUp, TrendingDown, ShoppingBasket, Trash2 } from "lucide-react"
+import { Plus, ArrowLeft, TrendingUp, TrendingDown, ShoppingBasket, Trash2, Share2, Users } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
@@ -24,6 +24,13 @@ interface Lista {
   id: string
   nome: string
   user_id: string
+  criador_id: string
+}
+
+interface Compartilhamento {
+  id: string
+  user_id: string
+  compartilhada_em: string
 }
 
 interface ItemLista {
@@ -49,11 +56,14 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
   const [lista, setLista] = useState<Lista | null>(null)
   const [itens, setItens] = useState<ItemLista[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
   const [nomeProduto, setNomeProduto] = useState("")
   const [quantidade, setQuantidade] = useState("1")
   const [unidade, setUnidade] = useState("un")
   const [marca, setMarca] = useState("")
   const [preco, setPreco] = useState("")
+  const [emailCompartilhar, setEmailCompartilhar] = useState("")
+  const [compartilhamentos, setCompartilhamentos] = useState<Compartilhamento[]>([])
   const [comparacaoPrecos, setComparacaoPrecos] = useState<Record<string, { ultimoPreco: number; variacao: number }>>(
     {},
   )
@@ -62,6 +72,67 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
   useEffect(() => {
     carregarLista()
     carregarItens()
+    carregarCompartilhamentos()
+
+    // Configurar subscriptions em tempo real
+    const supabase = createClient()
+    
+    // Subscription para mudanças na lista
+    const listaChannel = supabase
+      .channel(`lista-${listaId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'listas',
+          filter: `id=eq.${listaId}`
+        },
+        () => {
+          carregarLista()
+        }
+      )
+      .subscribe()
+
+    // Subscription para mudanças nos itens
+    const itensChannel = supabase
+      .channel(`itens-${listaId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'itens_lista',
+          filter: `lista_id=eq.${listaId}`
+        },
+        () => {
+          carregarItens()
+        }
+      )
+      .subscribe()
+
+    // Subscription para compartilhamentos
+    const compartilhamentosChannel = supabase
+      .channel(`compartilhamentos-${listaId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'lista_compartilhamentos',
+          filter: `lista_id=eq.${listaId}`
+        },
+        () => {
+          carregarCompartilhamentos()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(listaChannel)
+      supabase.removeChannel(itensChannel)
+      supabase.removeChannel(compartilhamentosChannel)
+    }
   }, [listaId])
 
   async function carregarLista() {
@@ -113,6 +184,90 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
     }
 
     setComparacaoPrecos(comparacoes)
+  }
+
+  async function carregarCompartilhamentos() {
+    const supabase = createClient()
+    const { data } = await supabase
+      .from("lista_compartilhamentos")
+      .select("*")
+      .eq("lista_id", listaId)
+
+    if (data) {
+      setCompartilhamentos(data)
+    }
+  }
+
+  async function compartilharLista() {
+    if (!emailCompartilhar.trim()) return
+
+    const supabase = createClient()
+
+    // Buscar usuário pelo email
+    const { data: { users }, error: searchError } = await supabase.auth.admin.listUsers()
+    
+    // Como não temos acesso admin na aplicação, vamos usar uma abordagem alternativa
+    // Precisamos que o usuário insira o ID do usuário com quem quer compartilhar
+    // Ou criar uma tabela de usuários públicos com emails visíveis
+    
+    // Por enquanto, vamos assumir que emailCompartilhar é na verdade um user_id
+    const userIdCompartilhar = emailCompartilhar.trim()
+
+    // Verificar se já não está compartilhado
+    const { data: existente } = await supabase
+      .from("lista_compartilhamentos")
+      .select("id")
+      .eq("lista_id", listaId)
+      .eq("user_id", userIdCompartilhar)
+      .single()
+
+    if (existente) {
+      alert("Lista já compartilhada com este usuário")
+      return
+    }
+
+    // Criar compartilhamento
+    const { error } = await supabase
+      .from("lista_compartilhamentos")
+      .insert({
+        lista_id: listaId,
+        user_id: userIdCompartilhar
+      })
+
+    if (!error) {
+      setEmailCompartilhar("")
+      setIsShareDialogOpen(false)
+      carregarCompartilhamentos()
+    } else {
+      alert("Erro ao compartilhar lista. Verifique o ID do usuário.")
+    }
+  }
+
+  async function removerCompartilhamento(compartilhamentoId: string) {
+    const supabase = createClient()
+    await supabase.from("lista_compartilhamentos").delete().eq("id", compartilhamentoId)
+    carregarCompartilhamentos()
+  }
+
+  async function excluirLista() {
+    if (!lista) return
+    
+    // Apenas o criador pode excluir
+    if (lista.criador_id !== userId) {
+      alert("Apenas o criador pode excluir esta lista")
+      return
+    }
+
+    if (!confirm("Tem certeza que deseja excluir esta lista?")) {
+      return
+    }
+
+    const supabase = createClient()
+    const { error } = await supabase.from("listas").delete().eq("id", listaId)
+
+    if (!error) {
+      router.push("/listas")
+    }
   }
 
   async function adicionarItem() {
@@ -204,19 +359,89 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
               <ShoppingBasket className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-emerald-900">{lista?.nome || "Carregando..."}</h1>
+              <h1 className="text-xl font-bold text-emerald-900 flex items-center gap-2">
+                {lista?.nome || "Carregando..."}
+                {compartilhamentos.length > 0 && (
+                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full flex items-center gap-1">
+                    <Users className="h-3 w-3" />
+                    Compartilhada
+                  </span>
+                )}
+              </h1>
               <p className="text-sm text-muted-foreground">
                 {itensChecked} de {itens.length} itens
               </p>
             </div>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-emerald-600 hover:bg-emerald-700">
-                <Plus className="mr-2 h-5 w-5" />
-                Adicionar
-              </Button>
-            </DialogTrigger>
+          <div className="flex items-center gap-2">
+            {lista?.criador_id === userId && (
+              <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="icon" className="border-emerald-600 text-emerald-600 hover:bg-emerald-50">
+                    <Share2 className="h-5 w-5" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Compartilhar Lista</DialogTitle>
+                    <DialogDescription>
+                      Compartilhe esta lista com outros usuários. Eles poderão ver e editar os itens.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="userId">ID do Usuário</Label>
+                      <Input
+                        id="userId"
+                        placeholder="Cole o ID do usuário aqui"
+                        value={emailCompartilhar}
+                        onChange={(e) => setEmailCompartilhar(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        O usuário precisa fornecer seu ID para compartilhamento
+                      </p>
+                    </div>
+                    {compartilhamentos.length > 0 && (
+                      <div className="grid gap-2">
+                        <Label>Usuários com acesso</Label>
+                        <div className="space-y-2">
+                          {compartilhamentos.map((comp) => (
+                            <div
+                              key={comp.id}
+                              className="flex items-center justify-between p-2 bg-muted rounded-md"
+                            >
+                              <span className="text-sm truncate">{comp.user_id}</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removerCompartilhamento(comp.id)}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                Remover
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <Button
+                    onClick={compartilharLista}
+                    className="bg-emerald-600 hover:bg-emerald-700 w-full"
+                    disabled={!emailCompartilhar.trim()}
+                  >
+                    Compartilhar
+                  </Button>
+                </DialogContent>
+              </Dialog>
+            )}
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-emerald-600 hover:bg-emerald-700">
+                  <Plus className="mr-2 h-5 w-5" />
+                  Adicionar
+                </Button>
+              </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Adicionar Item</DialogTitle>
@@ -297,6 +522,7 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
               </Button>
             </DialogContent>
           </Dialog>
+        </div>
         </div>
       </header>
 
