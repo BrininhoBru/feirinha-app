@@ -24,7 +24,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { toast } from "sonner"
-import { Plus, ArrowLeft, TrendingUp, TrendingDown, ShoppingBasket, Trash2, Share2, Users, Edit2, MoreVertical } from "lucide-react"
+import { 
+  Plus, 
+  ArrowLeft, 
+  TrendingUp, 
+  TrendingDown, 
+  ShoppingBasket, 
+  Trash2, 
+  Share2, 
+  Users, 
+  Edit2, 
+  MoreVertical 
+} from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
@@ -303,10 +314,11 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
     if (error) {
       toast.error("Erro ao excluir a lista")
       console.error("Erro ao excluir lista:", error)
-    } else {
-      toast.success("Lista excluída com sucesso")
-      router.push("/listas")
+      return
     }
+
+    toast.success("Lista excluída com sucesso")
+    router.push("/listas")
   }
 
   async function adicionarItem() {
