@@ -48,43 +48,60 @@ ALTER TABLE listas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE itens_lista ENABLE ROW LEVEL SECURITY;
 
 -- Políticas RLS para produtos (todos podem ler, qualquer usuário autenticado pode criar)
+DROP POLICY IF EXISTS "Produtos são públicos para leitura" ON produtos;
 CREATE POLICY "Produtos são públicos para leitura" ON produtos FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Usuários autenticados podem criar produtos" ON produtos;
 CREATE POLICY "Usuários autenticados podem criar produtos" ON produtos FOR INSERT WITH CHECK (true);
 
 -- Políticas RLS para histórico de preços (usuários veem apenas seus próprios registros)
+DROP POLICY IF EXISTS "Usuários veem seu próprio histórico" ON historico_precos;
 CREATE POLICY "Usuários veem seu próprio histórico" ON historico_precos FOR SELECT USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Usuários criam seu próprio histórico" ON historico_precos;
 CREATE POLICY "Usuários criam seu próprio histórico" ON historico_precos FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- Políticas RLS para listas (usuários gerenciam apenas suas próprias listas)
+DROP POLICY IF EXISTS "Usuários veem suas próprias listas" ON listas;
 CREATE POLICY "Usuários veem suas próprias listas" ON listas FOR SELECT USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Usuários criam suas próprias listas" ON listas;
 CREATE POLICY "Usuários criam suas próprias listas" ON listas FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Usuários atualizam suas próprias listas" ON listas;
 CREATE POLICY "Usuários atualizam suas próprias listas" ON listas FOR UPDATE USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Usuários deletam suas próprias listas" ON listas;
 CREATE POLICY "Usuários deletam suas próprias listas" ON listas FOR DELETE USING (auth.uid() = user_id);
 
 -- Políticas RLS para itens da lista
+DROP POLICY IF EXISTS "Usuários veem itens de suas listas" ON itens_lista;
 CREATE POLICY "Usuários veem itens de suas listas" ON itens_lista FOR SELECT 
   USING (EXISTS (
     SELECT 1 FROM listas WHERE listas.id = itens_lista.lista_id AND listas.user_id = auth.uid()
   ));
-  
+
+DROP POLICY IF EXISTS "Usuários criam itens em suas listas" ON itens_lista;
 CREATE POLICY "Usuários criam itens em suas listas" ON itens_lista FOR INSERT 
   WITH CHECK (EXISTS (
     SELECT 1 FROM listas WHERE listas.id = itens_lista.lista_id AND listas.user_id = auth.uid()
   ));
-  
+
+DROP POLICY IF EXISTS "Usuários atualizam itens de suas listas" ON itens_lista;
 CREATE POLICY "Usuários atualizam itens de suas listas" ON itens_lista FOR UPDATE 
   USING (EXISTS (
     SELECT 1 FROM listas WHERE listas.id = itens_lista.lista_id AND listas.user_id = auth.uid()
   ));
-  
+
+DROP POLICY IF EXISTS "Usuários deletam itens de suas listas" ON itens_lista;
 CREATE POLICY "Usuários deletam itens de suas listas" ON itens_lista FOR DELETE 
   USING (EXISTS (
     SELECT 1 FROM listas WHERE listas.id = itens_lista.lista_id AND listas.user_id = auth.uid()
   ));
 
 -- Criar índices para melhor performance
-CREATE INDEX idx_historico_precos_produto ON historico_precos(produto_id);
-CREATE INDEX idx_historico_precos_user ON historico_precos(user_id);
-CREATE INDEX idx_listas_user ON listas(user_id);
-CREATE INDEX idx_itens_lista_lista ON itens_lista(lista_id);
-CREATE INDEX idx_itens_lista_produto ON itens_lista(produto_id);
+CREATE INDEX IF NOT EXISTS idx_historico_precos_produto ON historico_precos(produto_id);
+CREATE INDEX IF NOT EXISTS idx_historico_precos_user ON historico_precos(user_id);
+CREATE INDEX IF NOT EXISTS idx_listas_user ON listas(user_id);
+CREATE INDEX IF NOT EXISTS idx_itens_lista_lista ON itens_lista(lista_id);
+CREATE INDEX IF NOT EXISTS idx_itens_lista_produto ON itens_lista(produto_id);
