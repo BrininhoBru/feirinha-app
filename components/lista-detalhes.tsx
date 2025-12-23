@@ -523,6 +523,7 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
             </DialogContent>
           </Dialog>
         </div>
+        </div>
       </header>
 
       <main className="container mx-auto px-4 py-6">
