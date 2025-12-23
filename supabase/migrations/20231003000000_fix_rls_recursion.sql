@@ -7,6 +7,7 @@
 ALTER TABLE lista_compartilhamentos ADD COLUMN IF NOT EXISTS lista_criador_id UUID;
 
 -- Step 2: Populate lista_criador_id from existing listas data
+-- Note: This UPDATE is efficient because idx_compartilhamentos_lista index already exists on lista_id
 UPDATE lista_compartilhamentos 
 SET lista_criador_id = listas.criador_id
 FROM listas
@@ -18,6 +19,8 @@ ALTER TABLE lista_compartilhamentos ALTER COLUMN lista_criador_id SET NOT NULL;
 
 -- Step 4: Create trigger function to keep lista_criador_id synchronized
 -- This ensures new compartilhamentos always have the correct lista_criador_id
+-- Note: SECURITY DEFINER is required so the trigger can read from listas table
+-- even when the calling user doesn't have direct read access to all listas rows
 CREATE OR REPLACE FUNCTION sync_lista_criador_id()
 RETURNS TRIGGER AS $$
 DECLARE
