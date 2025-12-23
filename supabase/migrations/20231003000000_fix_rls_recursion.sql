@@ -23,15 +23,19 @@ RETURNS TRIGGER AS $$
 DECLARE
   v_criador_id UUID;
 BEGIN
-  -- On INSERT or UPDATE, set lista_criador_id from listas table
+  -- On INSERT or UPDATE (when lista_id changes), set lista_criador_id from listas table
   IF TG_OP = 'INSERT' OR (TG_OP = 'UPDATE' AND NEW.lista_id IS DISTINCT FROM OLD.lista_id) THEN
     SELECT criador_id INTO v_criador_id
     FROM listas
     WHERE id = NEW.lista_id;
     
-    -- Ensure the lista exists, otherwise raise an error
-    IF v_criador_id IS NULL THEN
+    -- Check if the lista was found using FOUND variable (automatically set by SELECT INTO)
+    IF NOT FOUND THEN
       RAISE EXCEPTION 'Lista with id % does not exist', NEW.lista_id;
+    END IF;
+    
+    IF v_criador_id IS NULL THEN
+      RAISE EXCEPTION 'Lista with id % has NULL criador_id', NEW.lista_id;
     END IF;
     
     NEW.lista_criador_id := v_criador_id;
