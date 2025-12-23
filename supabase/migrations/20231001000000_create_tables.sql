@@ -1,7 +1,3 @@
--- NOTA: Este arquivo foi movido para supabase/migrations/20231001000000_create_tables.sql
--- As migrações agora são gerenciadas automaticamente pelo GitHub Actions
--- Veja: .github/workflows/supabase-migrations.yml
--- 
 -- Criar tabelas para o FeirinhaApp
 
 -- Tabela de produtos (catálogo)

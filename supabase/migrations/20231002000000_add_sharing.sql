@@ -1,7 +1,3 @@
--- NOTA: Este arquivo foi movido para supabase/migrations/20231002000000_add_sharing.sql
--- As migrações agora são gerenciadas automaticamente pelo GitHub Actions
--- Veja: .github/workflows/supabase-migrations.yml
--- 
 -- Adicionar compartilhamento de listas
 -- Este script adiciona a funcionalidade de compartilhar listas entre usuários
 
