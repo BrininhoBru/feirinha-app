@@ -16,7 +16,26 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Plus, ArrowLeft, TrendingUp, TrendingDown, ShoppingBasket, Trash2, Share2, Users } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { toast } from "sonner"
+import { 
+  Plus, 
+  ArrowLeft, 
+  TrendingUp, 
+  TrendingDown, 
+  ShoppingBasket, 
+  Trash2, 
+  Share2, 
+  Users, 
+  Edit2, 
+  MoreVertical 
+} from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
@@ -57,6 +76,8 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
   const [itens, setItens] = useState<ItemLista[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [novoNomeLista, setNovoNomeLista] = useState("")
   const [nomeProduto, setNomeProduto] = useState("")
   const [quantidade, setQuantidade] = useState("1")
   const [unidade, setUnidade] = useState("un")
@@ -249,25 +270,55 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
     carregarCompartilhamentos()
   }
 
+  async function editarNomeLista() {
+    if (!lista || !novoNomeLista.trim()) return
+    
+    // Apenas o criador pode editar o nome
+    if (lista.criador_id !== userId) {
+      toast.error("Apenas o criador pode editar o nome desta lista")
+      return
+    }
+
+    const supabase = createClient()
+    const { error } = await supabase
+      .from("listas")
+      .update({ nome: novoNomeLista.trim() })
+      .eq("id", listaId)
+
+    if (error) {
+      toast.error("Erro ao atualizar o nome da lista")
+      console.error("Erro ao atualizar lista:", error)
+    } else {
+      toast.success("Nome da lista atualizado com sucesso")
+      setIsEditDialogOpen(false)
+      carregarLista()
+    }
+  }
+
   async function excluirLista() {
     if (!lista) return
     
     // Apenas o criador pode excluir
     if (lista.criador_id !== userId) {
-      alert("Apenas o criador pode excluir esta lista")
+      toast.error("Apenas o criador pode excluir esta lista")
       return
     }
 
-    if (!confirm("Tem certeza que deseja excluir esta lista?")) {
+    if (!confirm("Tem certeza que deseja excluir esta lista? Esta ação não pode ser desfeita.")) {
       return
     }
 
     const supabase = createClient()
     const { error } = await supabase.from("listas").delete().eq("id", listaId)
 
-    if (!error) {
-      router.push("/listas")
+    if (error) {
+      toast.error("Erro ao excluir a lista")
+      console.error("Erro ao excluir lista:", error)
+      return
     }
+
+    toast.success("Lista excluída com sucesso")
+    router.push("/listas")
   }
 
   async function adicionarItem() {
@@ -375,65 +426,93 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
           </div>
           <div className="flex items-center gap-2">
             {lista?.criador_id === userId && (
-              <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="icon" className="border-emerald-600 text-emerald-600 hover:bg-emerald-50">
-                    <Share2 className="h-5 w-5" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Compartilhar Lista</DialogTitle>
-                    <DialogDescription>
-                      Compartilhe esta lista com outros usuários. Eles poderão ver e editar os itens.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="userId">ID do Usuário</Label>
-                      <Input
-                        id="userId"
-                        placeholder="Cole o ID do usuário aqui"
-                        value={emailCompartilhar}
-                        onChange={(e) => setEmailCompartilhar(e.target.value)}
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        O usuário precisa fornecer seu ID para compartilhamento
-                      </p>
-                    </div>
-                    {compartilhamentos.length > 0 && (
+              <>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon" className="text-emerald-600 hover:bg-emerald-50">
+                      <MoreVertical className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setNovoNomeLista(lista?.nome || "")
+                        setIsEditDialogOpen(true)
+                      }}
+                    >
+                      <Edit2 className="h-4 w-4" />
+                      Editar Nome
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={excluirLista}
+                      className="text-red-600 focus:text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Excluir Lista
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="icon" className="border-emerald-600 text-emerald-600 hover:bg-emerald-50">
+                      <Share2 className="h-5 w-5" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Compartilhar Lista</DialogTitle>
+                      <DialogDescription>
+                        Compartilhe esta lista com outros usuários. Eles poderão ver e editar os itens.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
                       <div className="grid gap-2">
-                        <Label>Usuários com acesso</Label>
-                        <div className="space-y-2">
-                          {compartilhamentos.map((comp) => (
-                            <div
-                              key={comp.id}
-                              className="flex items-center justify-between p-2 bg-muted rounded-md"
-                            >
-                              <span className="text-sm truncate">{comp.user_id}</span>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => removerCompartilhamento(comp.id)}
-                                className="text-red-600 hover:text-red-700"
-                              >
-                                Remover
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
+                        <Label htmlFor="userId">ID do Usuário</Label>
+                        <Input
+                          id="userId"
+                          placeholder="Cole o ID do usuário aqui"
+                          value={emailCompartilhar}
+                          onChange={(e) => setEmailCompartilhar(e.target.value)}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          O usuário precisa fornecer seu ID para compartilhamento
+                        </p>
                       </div>
-                    )}
-                  </div>
-                  <Button
-                    onClick={compartilharLista}
-                    className="bg-emerald-600 hover:bg-emerald-700 w-full"
-                    disabled={!emailCompartilhar.trim()}
-                  >
-                    Compartilhar
-                  </Button>
-                </DialogContent>
-              </Dialog>
+                      {compartilhamentos.length > 0 && (
+                        <div className="grid gap-2">
+                          <Label>Usuários com acesso</Label>
+                          <div className="space-y-2">
+                            {compartilhamentos.map((comp) => (
+                              <div
+                                key={comp.id}
+                                className="flex items-center justify-between p-2 bg-muted rounded-md"
+                              >
+                                <span className="text-sm truncate">{comp.user_id}</span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removerCompartilhamento(comp.id)}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  Remover
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      onClick={compartilharLista}
+                      className="bg-emerald-600 hover:bg-emerald-700 w-full"
+                      disabled={!emailCompartilhar.trim()}
+                    >
+                      Compartilhar
+                    </Button>
+                  </DialogContent>
+                </Dialog>
+              </>
             )}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
@@ -618,6 +697,41 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
           </div>
         )}
       </main>
+
+      {/* Dialog para editar nome da lista */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar Nome da Lista</DialogTitle>
+            <DialogDescription>
+              Altere o nome da sua lista de compras
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="nomeLista">Nome da Lista</Label>
+              <Input
+                id="nomeLista"
+                placeholder="Digite o novo nome da lista"
+                value={novoNomeLista}
+                onChange={(e) => setNovoNomeLista(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && novoNomeLista.trim()) {
+                    editarNomeLista()
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <Button
+            onClick={editarNomeLista}
+            className="bg-emerald-600 hover:bg-emerald-700 w-full"
+            disabled={!novoNomeLista.trim()}
+          >
+            Salvar
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
