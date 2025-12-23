@@ -1,30 +1,112 @@
-# Shopping list app
+# 🛒 FeirinhaApp
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+Um aplicativo de lista de compras inteligente que ajuda você a controlar seus gastos e acompanhar a variação de preços dos produtos ao longo do tempo.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/bruno-de-campos-projects/v0-shopping-list-app)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/il7qodoJNsd)
+## 📋 Sobre o Projeto
 
-## Overview
+O FeirinhaApp é uma solução moderna para gerenciar suas compras de supermercado e feira. Com ele, você pode criar listas de compras organizadas, adicionar produtos com quantidade, unidade, marca e preço, além de acompanhar automaticamente se os produtos aumentaram ou diminuíram de valor em relação às compras anteriores.
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+Este projeto foi desenvolvido com finalidade **pessoal e de portfólio**, demonstrando habilidades em desenvolvimento full-stack com tecnologias modernas.
 
-## Deployment
+## ✨ Funcionalidades
 
-Your project is live at:
+- 🔐 **Autenticação de usuários** com Supabase
+- 📝 **Criação e gerenciamento de múltiplas listas** de compras
+- ✅ **Checkboxes interativos** para marcar produtos já coletados
+- 🔢 **Controle de quantidade e unidade** (kg, litros, unidades, etc.)
+- 🏷️ **Registro de marca e preço** de cada produto
+- 📊 **Comparação automática de preços** entre compras
+- 📈 **Indicadores visuais** mostrando aumento ou redução de preços
+- 💰 **Cálculo automático do total** estimado da lista
+- 📱 **Design responsivo** para uso em qualquer dispositivo
 
-**[https://vercel.com/bruno-de-campos-projects/v0-shopping-list-app](https://vercel.com/bruno-de-campos-projects/v0-shopping-list-app)**
+## 🚀 Tecnologias Utilizadas
 
-## Build your app
+- **[Next.js 16](https://nextjs.org/)** - Framework React com App Router
+- **[React 19](https://react.dev/)** - Biblioteca para interfaces de usuário
+- **[TypeScript](https://www.typescriptlang.org/)** - JavaScript tipado
+- **[Tailwind CSS v4](https://tailwindcss.com/)** - Framework CSS utility-first
+- **[Supabase](https://supabase.com/)** - Backend as a Service (autenticação e banco de dados PostgreSQL)
+- **[shadcn/ui](https://ui.shadcn.com/)** - Componentes de UI reutilizáveis
+- **[SWR](https://swr.vercel.app/)** - Hooks React para data fetching
 
-Continue building your app on:
+## 🏗️ Estrutura do Projeto
 
-**[https://v0.app/chat/il7qodoJNsd](https://v0.app/chat/il7qodoJNsd)**
+```
+FeirinhaApp/
+├── app/                      # Páginas e rotas do Next.js App Router
+│   ├── auth/                 # Páginas de autenticação
+│   ├── listas/               # Páginas de gerenciamento de listas
+│   └── page.tsx              # Página inicial
+├── components/               # Componentes React reutilizáveis
+│   ├── ui/                   # Componentes de UI (shadcn)
+│   └── lista-detalhes.tsx    # Componente principal da lista
+├── lib/                      # Utilitários e configurações
+│   └── supabase/             # Configuração do Supabase
+├── scripts/                  # Scripts SQL para banco de dados
+└── proxy.ts                  # Middleware de autenticação
+```
 
-## How It Works
+## 🗄️ Banco de Dados
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+O projeto utiliza PostgreSQL através do Supabase com as seguintes tabelas:
+
+- **shopping_lists** - Armazena as listas de compras
+- **list_items** - Itens de cada lista
+- **price_history** - Histórico de preços para comparação
+
+Todas as tabelas possuem **Row Level Security (RLS)** habilitado para garantir que cada usuário acesse apenas seus próprios dados.
+
+## 🛠️ Como Executar Localmente
+
+1. Clone o repositório:
+```bash
+git clone https://github.com/seu-usuario/FeirinhaApp.git
+cd FeirinhaApp
+```
+
+2. Instale as dependências:
+```bash
+npm install
+```
+
+3. Configure as variáveis de ambiente:
+   - Crie um projeto no [Supabase](https://supabase.com/)
+   - Configure as variáveis de ambiente necessárias no Vercel ou arquivo `.env.local`
+
+4. Execute o script SQL:
+   - Acesse o SQL Editor do Supabase
+   - Execute o conteúdo de `scripts/001_create_tables.sql`
+
+5. Inicie o servidor de desenvolvimento:
+```bash
+npm run dev
+```
+
+6. Acesse [http://localhost:3000](http://localhost:3000)
+
+## 🚀 Deploy
+
+O projeto está pronto para deploy na [Vercel](https://vercel.com/):
+
+1. Clique no botão "Publish" no v0.dev, ou
+2. Conecte seu repositório GitHub na Vercel
+3. Configure as variáveis de ambiente do Supabase
+4. Deploy automático!
+
+## 📄 Licença
+
+Este projeto está sob a licença **MIT**. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+## 👨‍💻 Autor
+
+Desenvolvido como projeto pessoal e de portfólio para demonstrar habilidades em:
+- Desenvolvimento Full-Stack
+- Next.js e React
+- TypeScript
+- Banco de dados e autenticação
+- UI/UX Design
+
+---
+
+⭐ Se este projeto foi útil para você, considere dar uma estrela no repositório!
