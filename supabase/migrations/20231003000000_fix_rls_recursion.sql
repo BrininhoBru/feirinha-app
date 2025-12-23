@@ -4,10 +4,12 @@
 
 -- Step 1: Add lista_criador_id column to lista_compartilhamentos
 -- This denormalizes the creator information to avoid circular policy checks
+-- Note: Column is added as nullable initially to allow safe population
 ALTER TABLE lista_compartilhamentos ADD COLUMN IF NOT EXISTS lista_criador_id UUID;
 
 -- Step 2: Populate lista_criador_id from existing listas data
 -- Note: This UPDATE is efficient because idx_compartilhamentos_lista index already exists on lista_id
+-- The 'IS NULL' condition makes this migration idempotent (safe to run multiple times)
 UPDATE lista_compartilhamentos 
 SET lista_criador_id = listas.criador_id
 FROM listas
@@ -15,6 +17,8 @@ WHERE lista_compartilhamentos.lista_id = listas.id
 AND lista_compartilhamentos.lista_criador_id IS NULL;
 
 -- Step 3: Make lista_criador_id NOT NULL after population
+-- This will fail if there are orphaned rows (compartilhamentos without valid lista_id)
+-- which correctly exposes data integrity issues that need to be fixed
 ALTER TABLE lista_compartilhamentos ALTER COLUMN lista_criador_id SET NOT NULL;
 
 -- Step 4: Create trigger function to keep lista_criador_id synchronized
