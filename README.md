@@ -81,6 +81,8 @@ npm install
      - Obtenha em: https://supabase.com/dashboard/account/tokens
    - `SUPABASE_PROJECT_ID`: ID do projeto Supabase
      - Encontre na URL do dashboard: `https://supabase.com/dashboard/project/[PROJECT_ID]`
+   - `SUPABASE_DB_PASSWORD`: Senha do banco de dados
+     - Encontre em: Project Settings → Database → Database password
    - Configure em: Settings → Secrets and variables → Actions → New repository secret
 
 5. Execute as migrações do banco de dados:
@@ -125,6 +127,11 @@ Para que as migrações automáticas funcionem, configure os seguintes secrets n
    - ID de referência do projeto Supabase
    - Formato: `abcdefghijklmnop` (16 caracteres)
    - Encontre na URL: `https://supabase.com/dashboard/project/[PROJECT_ID]`
+
+3. **SUPABASE_DB_PASSWORD**
+   - Senha do banco de dados do projeto Supabase
+   - Encontre em: Project Settings → Database → Database password
+   - Necessária para vincular o projeto via CLI
 
 ## 📄 Licença
 
