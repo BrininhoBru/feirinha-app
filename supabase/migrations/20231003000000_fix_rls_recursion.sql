@@ -20,22 +20,31 @@ ALTER TABLE lista_compartilhamentos ALTER COLUMN lista_criador_id SET NOT NULL;
 -- This ensures new compartilhamentos always have the correct lista_criador_id
 CREATE OR REPLACE FUNCTION sync_lista_criador_id()
 RETURNS TRIGGER AS $$
+DECLARE
+  v_criador_id UUID;
 BEGIN
-  -- On INSERT, set lista_criador_id from listas table
-  IF TG_OP = 'INSERT' THEN
-    SELECT criador_id INTO NEW.lista_criador_id
+  -- On INSERT or UPDATE, set lista_criador_id from listas table
+  IF TG_OP = 'INSERT' OR (TG_OP = 'UPDATE' AND NEW.lista_id IS DISTINCT FROM OLD.lista_id) THEN
+    SELECT criador_id INTO v_criador_id
     FROM listas
     WHERE id = NEW.lista_id;
+    
+    -- Ensure the lista exists, otherwise raise an error
+    IF v_criador_id IS NULL THEN
+      RAISE EXCEPTION 'Lista with id % does not exist', NEW.lista_id;
+    END IF;
+    
+    NEW.lista_criador_id := v_criador_id;
   END IF;
   
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Step 5: Create trigger to automatically populate lista_criador_id on INSERT
+-- Step 5: Create trigger to automatically populate lista_criador_id on INSERT and UPDATE
 DROP TRIGGER IF EXISTS sync_lista_criador_id_trigger ON lista_compartilhamentos;
 CREATE TRIGGER sync_lista_criador_id_trigger
-  BEFORE INSERT ON lista_compartilhamentos
+  BEFORE INSERT OR UPDATE ON lista_compartilhamentos
   FOR EACH ROW
   EXECUTE FUNCTION sync_lista_criador_id();
 
