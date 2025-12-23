@@ -1,6 +1,6 @@
 # 🛒 FeirinhaApp
 
-> 🌐 **Aplicação em Produção:** [https://feirinha-app.vercel.app](https://feirinha-app.vercel.app)
+> 🌐 **Aplicação em Produção:** [https://feirinha-app.vercel.app](https://v0-feirinha-app.vercel.app)
 
 Um aplicativo de lista de compras inteligente que ajuda você a controlar seus gastos e acompanhar a variação de preços dos produtos ao longo do tempo.
 
