@@ -399,37 +399,37 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50">
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" asChild className="text-emerald-900">
+        <div className="container mx-auto px-4 py-3 sm:py-4 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <Button variant="ghost" size="icon" asChild className="text-emerald-900 shrink-0 h-10 w-10">
               <Link href="/listas">
                 <ArrowLeft className="h-5 w-5" />
               </Link>
             </Button>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 shrink-0">
               <ShoppingBasket className="h-6 w-6 text-white" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-emerald-900 flex items-center gap-2">
-                {lista?.nome || "Carregando..."}
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg sm:text-xl font-bold text-emerald-900 flex items-center gap-2 min-w-0">
+                <span className="truncate">{lista?.nome || "Carregando..."}</span>
                 {compartilhamentos.length > 0 && (
-                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full flex items-center gap-1">
+                  <span className="text-xs bg-blue-100 text-blue-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex items-center gap-1 shrink-0">
                     <Users className="h-3 w-3" />
-                    Compartilhada
+                    <span className="hidden sm:inline">Compartilhada</span>
                   </span>
                 )}
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">
                 {itensChecked} de {itens.length} itens
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {lista?.criador_id === userId && (
               <>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" className="text-emerald-600 hover:bg-emerald-50">
+                    <Button variant="outline" size="icon" className="text-emerald-600 hover:bg-emerald-50 h-10 w-10">
                       <MoreVertical className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -455,7 +455,7 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
                 </DropdownMenu>
                 <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="icon" className="border-emerald-600 text-emerald-600 hover:bg-emerald-50">
+                    <Button variant="outline" size="icon" className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 h-10 w-10">
                       <Share2 className="h-5 w-5" />
                     </Button>
                   </DialogTrigger>
@@ -474,6 +474,7 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
                           placeholder="Cole o ID do usuário aqui"
                           value={emailCompartilhar}
                           onChange={(e) => setEmailCompartilhar(e.target.value)}
+                          className="text-sm"
                         />
                         <p className="text-xs text-muted-foreground">
                           O usuário precisa fornecer seu ID para compartilhamento
@@ -486,14 +487,14 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
                             {compartilhamentos.map((comp) => (
                               <div
                                 key={comp.id}
-                                className="flex items-center justify-between p-2 bg-muted rounded-md"
+                                className="flex items-center justify-between p-2 bg-muted rounded-md gap-2 min-w-0"
                               >
-                                <span className="text-sm truncate">{comp.user_id}</span>
+                                <span className="text-sm truncate min-w-0 flex-1">{comp.user_id}</span>
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => removerCompartilhamento(comp.id)}
-                                  className="text-red-600 hover:text-red-700"
+                                  className="text-red-600 hover:text-red-700 shrink-0"
                                 >
                                   Remover
                                 </Button>
@@ -516,9 +517,9 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
             )}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-emerald-600 hover:bg-emerald-700">
-                  <Plus className="mr-2 h-5 w-5" />
-                  Adicionar
+                <Button className="bg-emerald-600 hover:bg-emerald-700 h-10">
+                  <Plus className="h-5 w-5" />
+                  <span className="hidden sm:inline ml-2">Adicionar</span>
                 </Button>
               </DialogTrigger>
             <DialogContent className="sm:max-w-md">
@@ -536,7 +537,7 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
                     onChange={(e) => setNomeProduto(e.target.value)}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="quantidade">Quantidade</Label>
                     <Input
@@ -605,13 +606,13 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-4 sm:py-6">
         {total > 0 && (
-          <Card className="mb-6 bg-emerald-600 text-white border-emerald-700">
-            <CardContent className="pt-6">
+          <Card className="mb-4 sm:mb-6 bg-emerald-600 text-white border-emerald-700">
+            <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-6">
               <div className="text-center">
                 <p className="text-sm font-medium text-emerald-100 mb-1">Total Estimado</p>
-                <p className="text-4xl font-bold">R$ {total.toFixed(2).replace(".", ",")}</p>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-bold">R$ {total.toFixed(2).replace(".", ",")}</p>
               </div>
             </CardContent>
           </Card>
@@ -630,13 +631,13 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {itens.map((item) => {
               const comparacao = comparacaoPrecos[item.id]
               return (
                 <Card key={item.id} className={`transition-all ${item.checked ? "opacity-60 bg-muted/50" : ""}`}>
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="flex items-start gap-2 sm:gap-3">
                       <Checkbox
                         checked={item.checked}
                         onCheckedChange={(checked) => toggleItem(item.id, checked as boolean)}
@@ -644,34 +645,34 @@ export function ListaDetalhes({ listaId, userId }: { listaId: string; userId: st
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1">
-                            <h3 className={`font-semibold text-lg ${item.checked ? "line-through" : ""}`}>
+                          <div className="flex-1 min-w-0">
+                            <h3 className={`font-semibold text-base sm:text-lg ${item.checked ? "line-through" : ""} break-words`}>
                               {item.produtos.nome}
                             </h3>
                             <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-sm text-muted-foreground">
                               <span>
                                 {item.quantidade} {item.unidade}
                               </span>
-                              {item.marca && <span>• {item.marca}</span>}
+                              {item.marca && <span className="truncate">• {item.marca}</span>}
                             </div>
                           </div>
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => removerItem(item.id)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 h-10 w-10 shrink-0"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                         {item.preco && (
-                          <div className="mt-2 flex items-center gap-2">
-                            <span className="text-lg font-bold text-emerald-700">
+                          <div className="mt-2 flex items-center gap-2 flex-wrap">
+                            <span className="text-base sm:text-lg font-bold text-emerald-700">
                               R$ {item.preco.toFixed(2).replace(".", ",")}
                             </span>
                             {comparacao && (
                               <div
-                                className={`flex items-center gap-1 text-sm font-medium px-2 py-1 rounded-full ${
+                                className={`flex items-center gap-1 text-xs sm:text-sm font-medium px-2 py-1 rounded-full ${
                                   comparacao.variacao > 0 ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
                                 }`}
                               >

@@ -45,13 +45,13 @@ export function PerfilDialog({ userId }: { userId: string }) {
                 id="userId"
                 value={userId}
                 readOnly
-                className="font-mono text-sm"
+                className="font-mono text-xs sm:text-sm truncate min-w-0"
               />
               <Button
                 type="button"
                 size="icon"
                 onClick={copiarUserId}
-                className="shrink-0"
+                className="shrink-0 h-10 w-10"
                 variant={copied ? "default" : "outline"}
               >
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
