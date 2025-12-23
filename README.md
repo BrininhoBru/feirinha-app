@@ -76,16 +76,62 @@ npm install
    - Crie um projeto no [Supabase](https://supabase.com/)
    - Configure as variáveis de ambiente necessárias no Vercel ou arquivo `.env.local`
 
-4. Execute o script SQL:
-   - Acesse o SQL Editor do Supabase
-   - Execute o conteúdo de `scripts/001_create_tables.sql`
+4. Configure os secrets do GitHub para migrações automáticas:
+   - `SUPABASE_ACCESS_TOKEN`: Token de acesso do Supabase
+     - Obtenha em: https://supabase.com/dashboard/account/tokens
+   - `SUPABASE_PROJECT_ID`: ID do projeto Supabase
+     - Encontre na URL do dashboard: `https://supabase.com/dashboard/project/[PROJECT_ID]`
+   - `SUPABASE_DB_PASSWORD`: Senha do banco de dados
+     - Encontre em: Project Settings → Database → Database password
+   - Configure em: Settings → Secrets and variables → Actions → New repository secret
 
-5. Inicie o servidor de desenvolvimento:
+5. Execute as migrações do banco de dados:
+   - **Opção A (Automática)**: As migrações em `supabase/migrations/` são executadas automaticamente via GitHub Actions ao fazer push na branch `main`
+   - **Opção B (Manual)**: Acesse o SQL Editor do Supabase e execute os arquivos da pasta `supabase/migrations/` em ordem
+
+6. Inicie o servidor de desenvolvimento:
 ```bash
 npm run dev
 ```
 
-6. Acesse [http://localhost:3000](http://localhost:3000)
+7. Acesse [http://localhost:3000](http://localhost:3000)
+
+## 🔄 Migrações do Banco de Dados
+
+As migrações do banco de dados são gerenciadas pelo Supabase CLI e executadas automaticamente via GitHub Actions:
+
+- **Localização**: `supabase/migrations/`
+- **Execução automática**: Push na branch `main` com alterações em `supabase/migrations/**`
+- **Workflow**: `.github/workflows/supabase-migrations.yml`
+
+### Estrutura de Migrações
+
+```
+supabase/
+├── config.toml                                    # Configuração do Supabase
+└── migrations/
+    ├── 20231001000000_create_tables.sql          # Criação das tabelas iniciais
+    └── 20231002000000_add_sharing.sql            # Funcionalidade de compartilhamento
+```
+
+### Secrets Necessários no GitHub
+
+Para que as migrações automáticas funcionem, configure os seguintes secrets no repositório:
+
+1. **SUPABASE_ACCESS_TOKEN**
+   - Token de acesso pessoal do Supabase
+   - Obtenha em: https://supabase.com/dashboard/account/tokens
+   - Permissões necessárias: Acesso ao projeto
+
+2. **SUPABASE_PROJECT_ID**
+   - ID de referência do projeto Supabase
+   - Formato: `abcdefghijklmnop` (16 caracteres)
+   - Encontre na URL: `https://supabase.com/dashboard/project/[PROJECT_ID]`
+
+3. **SUPABASE_DB_PASSWORD**
+   - Senha do banco de dados do projeto Supabase
+   - Encontre em: Project Settings → Database → Database password
+   - Necessária para vincular o projeto via CLI
 
 ## 📄 Licença
 
