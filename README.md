@@ -1,5 +1,7 @@
 # 🛒 FeirinhaApp
 
+> 🌐 **Aplicação em Produção:** [https://feirinha-app.vercel.app](https://feirinha-app.vercel.app)
+
 Um aplicativo de lista de compras inteligente que ajuda você a controlar seus gastos e acompanhar a variação de preços dos produtos ao longo do tempo.
 
 ## 📋 Sobre o Projeto
@@ -84,15 +86,6 @@ npm run dev
 ```
 
 6. Acesse [http://localhost:3000](http://localhost:3000)
-
-## 🚀 Deploy
-
-O projeto está pronto para deploy na [Vercel](https://vercel.com/):
-
-1. Clique no botão "Publish" no v0.dev, ou
-2. Conecte seu repositório GitHub na Vercel
-3. Configure as variáveis de ambiente do Supabase
-4. Deploy automático!
 
 ## 📄 Licença
 
