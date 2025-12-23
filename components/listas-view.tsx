@@ -104,20 +104,20 @@ export function ListasView({ userId }: { userId: string }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50">
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600">
+        <div className="container mx-auto px-4 py-3 sm:py-4 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 shrink-0">
               <ShoppingBasket className="h-6 w-6 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-emerald-900">FeirinhaApp</h1>
+            <h1 className="text-lg sm:text-2xl font-bold text-emerald-900 truncate">FeirinhaApp</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             <PerfilDialog userId={userId} />
             <Button
               variant="ghost"
               size="icon"
               onClick={handleLogout}
-              className="text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground h-10 w-10"
             >
               <LogOut className="h-5 w-5" />
             </Button>
@@ -125,15 +125,15 @@ export function ListasView({ userId }: { userId: string }) {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl font-bold text-emerald-900">Minhas Listas</h2>
-            <p className="text-muted-foreground">Organize suas compras e economize</p>
+      <main className="container mx-auto px-4 py-4 sm:py-8">
+        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+          <div className="min-w-0">
+            <h2 className="text-2xl sm:text-3xl font-bold text-emerald-900">Minhas Listas</h2>
+            <p className="text-sm sm:text-base text-muted-foreground">Organize suas compras e economize</p>
           </div>
-          <Button onClick={criarNovaLista} className="bg-emerald-600 hover:bg-emerald-700">
-            <Plus className="mr-2 h-5 w-5" />
-            Nova Lista
+          <Button onClick={criarNovaLista} className="bg-emerald-600 hover:bg-emerald-700 w-full sm:w-auto">
+            <Plus className="h-5 w-5" />
+            <span className="ml-2">Nova Lista</span>
           </Button>
         </div>
 
@@ -146,7 +146,7 @@ export function ListasView({ userId }: { userId: string }) {
             <CardContent className="flex flex-col items-center justify-center py-12">
               <ShoppingBasket className="h-16 w-16 text-muted-foreground mb-4" />
               <h3 className="text-xl font-semibold mb-2">Nenhuma lista ainda</h3>
-              <p className="text-muted-foreground mb-6 text-center">
+              <p className="text-muted-foreground mb-6 text-center px-4">
                 Crie sua primeira lista de compras e comece a economizar
               </p>
               <Button onClick={criarNovaLista} className="bg-emerald-600 hover:bg-emerald-700">
@@ -156,26 +156,26 @@ export function ListasView({ userId }: { userId: string }) {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {listas.map((lista) => {
               const isCompartilhada = lista.criador_id !== userId
               return (
                 <Link key={lista.id} href={`/listas/${lista.id}`}>
                   <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          {lista.nome}
+                    <CardHeader className="pb-3 sm:pb-4">
+                      <CardTitle className="flex items-start justify-between gap-2 min-w-0">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <span className="truncate text-base sm:text-lg">{lista.nome}</span>
                           {isCompartilhada && (
-                            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full flex items-center gap-1">
+                            <span className="text-xs bg-blue-100 text-blue-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full flex items-center gap-1 shrink-0">
                               <Users className="h-3 w-3" />
-                              Compartilhada
+                              <span className="hidden sm:inline">Compartilhada</span>
                             </span>
                           )}
                         </div>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                        <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
                       </CardTitle>
-                      <CardDescription>{new Date(lista.criada_em).toLocaleDateString("pt-BR")}</CardDescription>
+                      <CardDescription className="text-sm">{new Date(lista.criada_em).toLocaleDateString("pt-BR")}</CardDescription>
                     </CardHeader>
                   </Card>
                 </Link>
